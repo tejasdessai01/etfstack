@@ -1,11 +1,14 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
+import { intentFromPrompt } from '@/lib/intent';
+import { topEtfs } from '@/lib/getEtfs';
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-export async function POST(_req: NextRequest) {
-  return new Response(JSON.stringify({ message: "pong" }), {
-    headers: { "Content-Type": "application/json" },
-  });
+export async function POST(req: NextRequest) {
+  const { prompt } = await req.json();
+
+  const tags = await intentFromPrompt(prompt);
+  const etfs = await topEtfs(tags);
+
+  return Response.json({ tags, etfs });
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
