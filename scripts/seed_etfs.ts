@@ -1,16 +1,11 @@
-// --- load env ---------------------------------------------------
-import { fileURLToPath } from 'url';
-import path from 'path';
-import { config } from 'dotenv';
+// scripts/seed_etfs.ts – clean, idempotent seeder
+// --------------------------------------------------
+// 1. Loads SUPABASE_URL & SUPABASE_ANON automatically from .env
+// 2. Parses both comma‑ and pipe‑delimited files
+// 3. Upserts in 500‑row batches to avoid rate limits
+// --------------------------------------------------
 
-// recreate __dirname for ES‑modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// point dotenv at the project‑root .env.local
-config({ path: path.resolve(__dirname, '../.env.local') });
-
-// --- rest of your imports --------------------------------------
+import 'dotenv/config';
 import fs from 'fs';
 import { createClient } from '@supabase/supabase-js';
 
@@ -19,25 +14,48 @@ const supabase = createClient(
   process.env.SUPABASE_ANON!
 );
 
-function parseCSV(path: string) {
+/**
+ * Parse NYSE CSV or Nasdaq TXT feed, auto‑detecting delimiter.
+ */
+function parseFile(filePath: string): string[] {
   return fs
-    .readFileSync(path, 'utf8')
+    .readFileSync(filePath, 'utf8')
     .split('\n')
-    .slice(1)       // skip header
-    .map(l => l.split(',')[0]?.replace(/"/g, '').trim()) // ticker col
-    .filter(Boolean);
+    .filter(Boolean)                // drop blank lines
+    .slice(1)                       // skip header row
+    .map((row) => {
+      const delim = row.includes('|') ? '|' : ',';  // auto‑detect
+      return row.split(delim)[0].replace(/"/g, '').trim();
+    })
+    .filter((sym) => /^[A-Z]+$/.test(sym));         // ensure clean ticker
 }
 
-(async () => {
-  const tickers = [
-    ...new Set([
-      ...parseCSV('scripts/data/nyse_etfs.csv'),
-      ...parseCSV('scripts/data/nasdaq_etfs.csv')
-    ]),
-  ];
+async function main() {
+  // --- gather unique tickers ---------------------------------
+  const tickers = Array.from(
+    new Set([
+      ...parseFile('scripts/data/nyse_etfs.csv'),
+      ...parseFile('scripts/data/nasdaq_etfs.csv'),
+    ])
+  );
 
-  for (const t of tickers) {
-    await supabase.from('etfs').insert({ ticker: t }).select();
+  const rows = tickers.map((t) => ({ ticker: t }));
+  const CHUNK = 500;
+
+  // --- bulk upsert in manageable chunks ----------------------
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK);
+    await supabase
+      .from('etfs')
+      .upsert(chunk, { onConflict: 'ticker', ignoreDuplicates: true });
+    console.log(`upserted ${i + chunk.length}/${rows.length}`);
   }
-  console.log(`Inserted ${tickers.length} tickers`);
-})();
+
+  console.log('seed complete');
+  process.exit(0);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
