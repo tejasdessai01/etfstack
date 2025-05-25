@@ -1,14 +1,16 @@
 import { NextRequest } from 'next/server';
-import { intentFromPrompt } from '@/lib/intent';   // your existing prompt→tags fn
+import { intentFromPrompt } from '@/lib/intent';
 import { topEtfs } from '@/lib/getEtfs';
 
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
-  const { prompt, depth = 'simple' } = await req.json();
+  const { prompt, depth = 'simple' } = await req.json();        // depth = UI radio
 
-  const tags = await intentFromPrompt(prompt);
-  tags.depth = depth;                              // attach UI choice
+  const baseTags = await intentFromPrompt(prompt);              // goal, volatility…
+
+  // create a fresh object that includes depth
+  const tags = { ...baseTags, depth } as const;
 
   const etfs = await topEtfs(tags);
 

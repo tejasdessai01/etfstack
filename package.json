@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node scripts/seed_etfs.ts"
+    "seed": "ts-node scripts/seed_etfs.ts",
+    "embed": "ts-node scripts/embed_names.ts"
   },
   "dependencies": {
     "next": "15.3.2",
-    "openai": "^4.98.0",
+    "openai": "^4.103.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
