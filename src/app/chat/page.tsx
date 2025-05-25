@@ -1,6 +1,5 @@
-"use client"; // has to be the first line
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+"use client";
 
 import { useState } from "react";
 
