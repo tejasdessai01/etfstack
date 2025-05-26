@@ -56,24 +56,48 @@ export default function Home() {
 
       {/* results list */}
       {hits && (
-        <div className="space-y-3">
-          {hits.length === 0 && <p>No matches—try a different phrase.</p>}
-          {hits.map((e: any) => (
-            <div
-              key={e.ticker}
-              className="border rounded p-4 flex justify-between items-center"
-            >
-              <div>
-                <div className="font-medium">{e.ticker}</div>
-                <div className="text-sm text-gray-500">{e.name}</div>
-              </div>
-              <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                {(e.score * 100).toFixed(0)}%
-              </span>
-            </div>
-          ))}
+  <div className="space-y-3">
+    {hits.length === 0 && <p>No matches—try another phrase.</p>}
+
+    {hits.map((e: any) => (
+      <div
+        key={e.ticker}
+        className="border rounded p-4 space-y-2"
+      >
+        <div className="flex justify-between items-center">
+          <div className="font-medium">{e.ticker}</div>
+          <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+            {(e.score * 100).toFixed(0)}%
+          </span>
         </div>
-      )}
+
+        <div className="text-sm text-gray-500">{e.name}</div>
+
+        {/* tag chips */}
+        <div className="flex flex-wrap gap-2 text-xs">
+          {e.theme?.slice(0, 3).map((t: string) => (
+            <span
+              key={t}
+              className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full"
+            >
+              {t}
+            </span>
+          ))}
+          {e.structure && (
+            <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+              {e.structure}
+            </span>
+          )}
+          {e.outcome && (
+            <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+              {e.outcome}
+            </span>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+)}
     </main>
   );
 }
