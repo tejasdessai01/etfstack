@@ -85,19 +85,15 @@ export default function Chat() {
           {resp.etfs.map((e: any) => (
             <div
               key={e.ticker}
-              className="border rounded p-4 flex justify-between"
+              className="rounded-xl shadow-md bg-white p-4 flex justify-between hover:shadow-lg transition-shadow"
             >
               <div>
                 <div className="font-medium text-lg">{e.ticker}</div>
                 <div className="text-sm text-gray-500">
-                  Yield {e.yield_12m ?? "—"}% • Expense {e.expense ?? "—"}% •
-                  Vol {e.vol_3y ?? "—"}%
+                  Yield {e.yield_12m ?? "—"}% • Expense {e.expense ?? "—"}% • Vol {e.vol_3y ?? "—"}%
                 </div>
               </div>
-              <button
-                className="bg-black text-white px-4 py-1 rounded text-sm"
-                disabled
-              >
+              <button className="bg-black text-white px-4 py-1 rounded text-sm" disabled>
                 Trade
               </button>
             </div>

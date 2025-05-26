@@ -72,7 +72,7 @@ export default function Home() {
           {hits.map((e: any) => (
             <div
               key={e.ticker}
-              className="border rounded p-4 space-y-2"
+              className="rounded-xl shadow-md bg-white p-4 space-y-2 hover:shadow-lg transition-shadow"
             >
               <div className="flex justify-between items-center">
                 <div className="font-medium">{e.ticker}</div>
