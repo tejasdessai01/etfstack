@@ -2,14 +2,13 @@
 "use client";
 
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Chat() {
   const [input, setInput] = useState("");
   const [resp, setResp] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
-  const [depth, setDepth] = useState<"simple" | "balanced" | "granular">(
-    "simple"
-  );
+  const [depth, setDepth] = useState<"simple" | "balanced" | "granular">("simple");
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
@@ -48,33 +47,17 @@ export default function Chat() {
 
       {/* depth dial */}
       <div className="flex items-center gap-4 text-sm">
-        <label className="flex items-center gap-1">
-          <input
-            type="radio"
-            value="simple"
-            checked={depth === "simple"}
-            onChange={() => setDepth("simple")}
-          />
-          Simple (2)
-        </label>
-        <label className="flex items-center gap-1">
-          <input
-            type="radio"
-            value="balanced"
-            checked={depth === "balanced"}
-            onChange={() => setDepth("balanced")}
-          />
-          Balanced (4)
-        </label>
-        <label className="flex items-center gap-1">
-          <input
-            type="radio"
-            value="granular"
-            checked={depth === "granular"}
-            onChange={() => setDepth("granular")}
-          />
-          Granular (6)
-        </label>
+        {(["simple", "balanced", "granular"] as const).map((d) => (
+          <label key={d} className="flex items-center gap-1">
+            <input
+              type="radio"
+              value={d}
+              checked={depth === d}
+              onChange={() => setDepth(d)}
+            />
+            {d === "simple" ? "Simple (2)" : d === "balanced" ? "Balanced (4)" : "Granular (6)"}
+          </label>
+        ))}
       </div>
 
       <button
@@ -87,8 +70,17 @@ export default function Chat() {
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
+      {/* loading skeletons */}
+      {loading && (
+        <div className="space-y-2">
+          {Array.from({ length: depth === "simple" ? 2 : depth === "balanced" ? 4 : 6 }).map((_, i) => (
+            <Skeleton key={i} className="w-full h-20 rounded" />
+          ))}
+        </div>
+      )}
+
       {/* results */}
-      {resp?.etfs && (
+      {!loading && resp?.etfs && (
         <div className="space-y-3">
           {resp.etfs.map((e: any) => (
             <div
