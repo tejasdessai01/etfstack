@@ -20,8 +20,8 @@ export default function Home() {
         body: JSON.stringify({ query, limit: 10 }),
       });
       if (!r.ok) throw new Error(await r.text());
-      const json = await r.json();
-      setHits(json.results);
+      const { results } = await r.json();
+      setHits(results);
     } catch (e) {
       console.error(e);
       setError("Search failed. Try again.");
@@ -54,17 +54,22 @@ export default function Home() {
 
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* results */}
+      {/* results list */}
       {hits && (
         <div className="space-y-3">
-          {hits.length === 0 && <p>No matches.</p>}
-          {hits.map((h) => (
-            <div key={h.ticker} className="border rounded p-4">
-              <div className="font-medium">{h.ticker}</div>
-              <div className="text-sm text-gray-500">{h.name}</div>
-              <div className="mt-1 text-xs text-gray-400">
-                Similarity score: {h.score.toFixed(2)}
+          {hits.length === 0 && <p>No matches—try a different phrase.</p>}
+          {hits.map((e: any) => (
+            <div
+              key={e.ticker}
+              className="border rounded p-4 flex justify-between items-center"
+            >
+              <div>
+                <div className="font-medium">{e.ticker}</div>
+                <div className="text-sm text-gray-500">{e.name}</div>
               </div>
+              <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                {(e.score * 100).toFixed(0)}%
+              </span>
             </div>
           ))}
         </div>
